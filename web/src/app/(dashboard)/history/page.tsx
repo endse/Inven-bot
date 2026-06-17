@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 export default async function HistoryPage() {
   const approvedDrafts = await prisma.invoiceDraft.findMany({
     where: { status: "approved" },
-    include: { transactions: true },
+    select: { id: true, transactionType: true, status: true, extractedData: true, createdAt: true, updatedAt: true, transactions: true },
     orderBy: { createdAt: "desc" }
   })
 

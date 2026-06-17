@@ -6,11 +6,12 @@ export const dynamic = 'force-dynamic';
 export default async function ReviewPage() {
   const drafts = await prisma.invoiceDraft.findMany({
     where: { status: "pending_review" },
+    select: { id: true, transactionType: true, status: true, extractedData: true, createdAt: true, updatedAt: true },
     orderBy: { createdAt: "asc" }
   })
 
   // We serialize drafts because extractedData is Json and needs to be passed to Client Component
-  const serializedDrafts = drafts.map(d => ({
+  const serializedDrafts = drafts.map((d: any) => ({
     ...d,
     extractedData: d.extractedData as any
   }))

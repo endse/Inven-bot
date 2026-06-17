@@ -85,7 +85,7 @@ export default function HistoryClient({ initialDrafts }: { initialDrafts: any[] 
           </div>
           <div className="flex-1 overflow-auto p-4 cursor-grab active:cursor-grabbing flex items-center justify-center">
             <img 
-              src={editingDraft.imageUrl} 
+              src={`/api/images/${editingDraft.id}`} 
               alt="Invoice" 
               className="shadow-sm transition-transform duration-200" 
               style={{ transform: `scale(${zoom})`, transformOrigin: "center" }}
@@ -158,7 +158,7 @@ export default function HistoryClient({ initialDrafts }: { initialDrafts: any[] 
         return (
           <div key={draft.id} className="border bg-white rounded-lg overflow-hidden shadow-sm flex flex-col">
             <div className="h-48 bg-slate-100 overflow-hidden relative border-b">
-              <img src={draft.imageUrl} alt="Invoice" className="w-full h-full object-cover" />
+              <img src={`/api/images/${draft.id}`} alt="Invoice" className="w-full h-full object-cover" />
               <div className="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
                 {new Date(draft.createdAt).toLocaleDateString()}
               </div>

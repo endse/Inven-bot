@@ -27,7 +27,7 @@ export default function ReviewClient({ initialDrafts }: { initialDrafts: any[] }
               <p>Date: {draft.extractedData?.invoice_date || "Unknown"}</p>
               <p>Items Detected: {draft.extractedData?.items?.length || 0}</p>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={draft.imageUrl} alt="thumbnail" className="mt-4 h-32 w-full object-cover rounded" />
+              <img src={`/api/images/${draft.id}`} alt="thumbnail" className="mt-4 h-32 w-full object-cover rounded" />
             </CardContent>
           </Card>
         ))}
@@ -74,7 +74,7 @@ export default function ReviewClient({ initialDrafts }: { initialDrafts: any[] }
         <div className="flex-1 overflow-auto p-4 cursor-grab active:cursor-grabbing">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img 
-            src={activeDraft.imageUrl} 
+            src={`/api/images/${activeDraft.id}`} 
             alt="Invoice" 
             className="shadow-sm transition-transform duration-200 origin-top-left" 
             style={{ transform: `scale(${zoom})`, minWidth: zoom > 1 ? '100%' : 'auto' }}
