@@ -1,0 +1,67 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Product {
+  id           String   @id @default(uuid())
+  name         String   @unique
+  hsn          String?
+  lastRate     Decimal?
+
+  transactions Transaction[]
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Transaction {
+  id               String   @id @default(uuid())
+  productId        String
+  product          Product  @relation(fields: [productId], references: [id])
+  
+  transactionType  String   // "purchase" | "sale"
+  transactionDate  DateTime
+  dateSource       String   // "extracted" | "current"
+  
+  quantity         Decimal
+  rate             Decimal?
+  amount           Decimal?
+  
+  invoiceImageUrl  String?
+  invoiceHash      String?
+  rawAiResponse    Json?
+  
+  invoiceDraftId   String?
+  invoiceDraft     InvoiceDraft? @relation(fields: [invoiceDraftId], references: [id], onDelete: Cascade)
+
+  createdAt        DateTime @default(now())
+}
+
+model ProductReview {
+  id                 String   @id @default(uuid())
+  invoiceProductName String
+  suggestedProductId String?  
+  similarityScore    Float?
+  status             String   // "pending" | "resolved" | "ignored"
+  
+  createdAt          DateTime @default(now())
+}
+
+model InvoiceDraft {
+  id              String   @id @default(uuid())
+  imageUrl        String
+  transactionType String   // "purchase" | "sale"
+  status          String   // "processing" | "pending_review" | "approved" | "rejected"
+  extractedData   Json?    
+  
+  transactions    Transaction[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
