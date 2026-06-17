@@ -196,6 +196,23 @@ export default function HistoryClient({ initialDrafts }: { initialDrafts: any[] 
                   <Pencil className="h-4 w-4" /> Edit
                 </button>
                 <button 
+                  onClick={async () => {
+                    const email = window.prompt("Enter email address to send this bill to:");
+                    if (!email) return;
+                    try {
+                      const { queueGeneratedBillEmail } = await import('../email-actions');
+                      await queueGeneratedBillEmail(draft.id, email);
+                      toast.success("Bill queued for emailing!");
+                    } catch (e: any) {
+                      toast.error("Failed to queue email: " + e.message);
+                    }
+                  }}
+                  className="px-4 py-2.5 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2"
+                  title="Email PDF"
+                >
+                  <FileText className="h-4 w-4" />
+                </button>
+                <button 
                   onClick={() => handleDelete(draft.id)}
                   disabled={deletingId === draft.id}
                   className="px-4 py-2.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-xl text-sm font-bold transition-colors disabled:opacity-50 flex items-center gap-2"

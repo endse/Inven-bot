@@ -78,3 +78,16 @@ model GenerateQueue {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
+
+model EmailQueue {
+  id           String   @id @default(uuid())
+  type         String   // "monthly_inventory" | "generated_bill"
+  payload      Json     // contains month for inventory, or draftId for bill
+  recipient    String   // email address
+  status       String   // "pending" | "processing" | "completed" | "failed"
+  attempts     Int      @default(0)
+  errorMessage String?
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
