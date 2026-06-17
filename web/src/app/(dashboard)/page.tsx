@@ -1,74 +1,127 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Package, ShoppingCart, TrendingUp, AlertCircle } from "lucide-react";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/lib/prisma"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Package, TrendingUp, TrendingDown, Clock, Activity } from "lucide-react"
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 export default async function DashboardPage() {
-  const totalProducts = await prisma.product.count();
+  const productCount = await prisma.product.count()
   
-  // Calculate this month's stats
-  const now = new Date();
-  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-  
-  const thisMonthTransactions = await prisma.transaction.findMany({
-    where: { transactionDate: { gte: firstDay } }
-  });
-
-  const monthPurchases = thisMonthTransactions
-    .filter(t => t.transactionType === "purchase")
-    .reduce((sum, t) => sum + Number(t.quantity), 0);
-
-  const monthSales = thisMonthTransactions
-    .filter(t => t.transactionType === "sale")
-    .reduce((sum, t) => sum + Number(t.quantity), 0);
-
+  // Pending reviews
   const pendingReviews = await prisma.invoiceDraft.count({
     where: { status: "pending_review" }
-  });
+  })
+
+  // Get total purchases vs sales this month
+  const startOfMonth = new Date()
+  startOfMonth.setDate(1)
+  startOfMonth.setHours(0,0,0,0)
+
+  const transactions = await prisma.transaction.findMany({
+    where: { transactionDate: { gte: startOfMonth } }
+  })
+
+  const totalPurchases = transactions.filter(t => t.transactionType === 'purchase').length
+  const totalSales = transactions.filter(t => t.transactionType === 'sale').length
+
+  const stats = [
+    {
+      title: "Total Inventory Items",
+      value: productCount.toLocaleString(),
+      icon: Package,
+      description: "Unique products in system",
+      trend: "active",
+      color: "from-blue-500/20 to-blue-600/20 text-blue-600",
+      bg: "bg-blue-500/10"
+    },
+    {
+      title: "Pending Reviews",
+      value: pendingReviews.toString(),
+      icon: Clock,
+      description: "Invoices needing approval",
+      trend: pendingReviews > 0 ? "warning" : "neutral",
+      color: "from-amber-500/20 to-amber-600/20 text-amber-600",
+      bg: "bg-amber-500/10"
+    },
+    {
+      title: "Monthly Purchases",
+      value: totalPurchases.toString(),
+      icon: TrendingDown,
+      description: "Inward stock operations",
+      trend: "positive",
+      color: "from-emerald-500/20 to-emerald-600/20 text-emerald-600",
+      bg: "bg-emerald-500/10"
+    },
+    {
+      title: "Monthly Sales",
+      value: totalSales.toString(),
+      icon: TrendingUp,
+      description: "Outward stock operations",
+      trend: "positive",
+      color: "from-violet-500/20 to-violet-600/20 text-violet-600",
+      bg: "bg-violet-500/10"
+    }
+  ]
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-      
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Products</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalProducts}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">This Month's Purchases</CardTitle>
-            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{monthPurchases}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">This Month's Sales</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{monthSales}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Pending Reviews</CardTitle>
-            <AlertCircle className="h-4 w-4 text-destructive" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-destructive">{pendingReviews}</div>
-          </CardContent>
-        </Card>
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">Overview</h1>
+          <p className="text-slate-500 mt-2 text-lg">Your automated inventory and accounting summary.</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {stats.map((stat, idx) => (
+          <div key={idx} className="group relative overflow-hidden rounded-2xl border bg-white p-6 shadow-sm transition-all hover:shadow-md hover:-translate-y-1">
+            <div className={`absolute -right-6 -top-6 h-24 w-24 rounded-full bg-gradient-to-br opacity-50 blur-2xl transition-all group-hover:scale-150 ${stat.color}`} />
+            
+            <div className="relative flex items-center justify-between">
+              <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${stat.bg}`}>
+                <stat.icon className={`h-6 w-6 ${stat.color.split(' ').pop()}`} />
+              </div>
+            </div>
+            
+            <div className="relative mt-6">
+              <h3 className="text-sm font-medium text-slate-500">{stat.title}</h3>
+              <p className="mt-2 text-3xl font-bold tracking-tight text-slate-900">{stat.value}</p>
+              <p className="mt-1 text-sm text-slate-400">{stat.description}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Placeholder for future charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+        <div className="lg:col-span-2 rounded-2xl border bg-white p-8 shadow-sm">
+          <div className="flex items-center gap-3 border-b pb-4 mb-4">
+            <Activity className="h-5 w-5 text-indigo-500" />
+            <h3 className="text-lg font-semibold text-slate-800">Recent Activity</h3>
+          </div>
+          <div className="h-64 flex flex-col items-center justify-center text-slate-400 border-2 border-dashed rounded-xl bg-slate-50/50">
+            <TrendingUp className="h-8 w-8 mb-3 opacity-20" />
+            <p>Chart data will populate as transactions are recorded.</p>
+          </div>
+        </div>
+        <div className="rounded-2xl border bg-gradient-to-br from-indigo-500 to-violet-600 p-8 shadow-lg text-white">
+          <h3 className="text-lg font-semibold opacity-90">System Status</h3>
+          <div className="mt-6 space-y-4">
+            <div className="flex justify-between items-center border-b border-white/20 pb-4">
+              <span className="opacity-80">OCR Engine</span>
+              <span className="bg-white/20 px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm">Online</span>
+            </div>
+            <div className="flex justify-between items-center border-b border-white/20 pb-4">
+              <span className="opacity-80">Telegram Bot</span>
+              <span className="bg-white/20 px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm">Listening</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="opacity-80">Database</span>
+              <span className="bg-white/20 px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm">Connected</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-  );
+  )
 }
