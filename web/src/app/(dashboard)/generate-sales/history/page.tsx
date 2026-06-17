@@ -87,7 +87,7 @@ export default async function GenerateHistoryPage() {
                         </div>
                       </td>
                       <td className="px-8 py-5 font-medium text-zinc-800">
-                        ${item.minAmount} - ${item.maxAmount}
+                        ₹{item.minAmount} - ₹{item.maxAmount}
                       </td>
                       <td className="px-8 py-5 text-zinc-500">
                         {item.attempts}

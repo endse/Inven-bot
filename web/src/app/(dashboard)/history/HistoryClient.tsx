@@ -184,7 +184,7 @@ export default function HistoryClient({ initialDrafts }: { initialDrafts: any[] 
                   <p className="text-sm text-slate-500 mt-1">{totalItems} items recorded</p>
                 </div>
                 <div className="text-right bg-slate-50 px-3 py-1.5 rounded-lg border">
-                  <span className="font-bold text-slate-800">${totalAmount.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                  <span className="font-bold text-slate-800">₹{totalAmount.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                 </div>
               </div>
               

@@ -201,7 +201,7 @@ export default function ReviewClient({ initialDrafts }: { initialDrafts: any[] }
                   
                   <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
                     <div className="text-sm font-medium text-slate-600">
-                      Total: ${(Number(item.quantity || 0) * Number(item.rate || 0)).toFixed(2)}
+                      Total: ₹{(Number(item.quantity || 0) * Number(item.rate || 0)).toFixed(2)}
                     </div>
                     <div className="flex items-center gap-3 w-full sm:w-auto">
                       <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider hidden sm:inline">Action</span>

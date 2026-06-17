@@ -55,7 +55,7 @@ export async function processQueueAction() {
 
   try {
     const products = await prisma.product.findMany({
-      select: { id: true, name: true, lastRate: true },
+      select: { id: true, name: true, lastRate: true, hsn: true },
       where: { lastRate: { not: null } }
     });
 
@@ -66,6 +66,7 @@ export async function processQueueAction() {
     const formattedProducts = products.map(p => ({
       id: p.id,
       name: p.name,
+      hsn: p.hsn,
       rate: Number(p.lastRate)
     }));
 

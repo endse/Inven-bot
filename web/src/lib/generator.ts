@@ -5,6 +5,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 export interface GeneratedSaleItem {
   productId: string;
   product_name: string;
+  hsn?: string;
   quantity: number;
   rate: number;
   amount: number;
@@ -16,16 +17,16 @@ export interface GeneratedSale {
 }
 
 export async function generateSmartSale(
-  products: { id: string; name: string; rate: number }[],
+  products: { id: string; name: string; rate: number; hsn?: string | null }[],
   minAmount: number,
   maxAmount: number
 ): Promise<GeneratedSale> {
   const prompt = `You are a smart sales generator for an inventory system.
-I will provide you with a list of available products and their rates.
+I will provide you with a list of available products, their rates, and their HSN codes.
 Your task is to select a subset of 3 to 7 products that are LOGICALLY RELEVANT or commonly bought together (e.g. group all office supplies, or group all electronics).
 Then, assign realistic integer quantities to these products such that the TOTAL bill amount falls EXACTLY between ${minAmount} and ${maxAmount}.
 
-Available Products (JSON format: [{id, name, rate}]):
+Available Products (JSON format: [{id, name, rate, hsn}]):
 ${JSON.stringify(products, null, 2)}
 
 Return ONLY a valid JSON object matching this structure exactly:
@@ -34,6 +35,7 @@ Return ONLY a valid JSON object matching this structure exactly:
     {
       "productId": "string",
       "product_name": "string",
+      "hsn": "string or null",
       "quantity": 0,
       "rate": 0,
       "amount": 0 // must equal quantity * rate

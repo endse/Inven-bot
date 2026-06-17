@@ -96,7 +96,7 @@ export default function GenerateClient({ initialDrafts = [] }: { initialDrafts?:
                     {range.label}
                   </span>
                   <span className={`text-sm ${selectedRange.id === range.id ? 'font-semibold text-zinc-900' : 'text-zinc-400'}`}>
-                    ${range.min} - ${range.max}
+                    ₹{range.min} - ₹{range.max}
                   </span>
                 </button>
               ))}
@@ -140,7 +140,7 @@ export default function GenerateClient({ initialDrafts = [] }: { initialDrafts?:
                     className={`flex items-center justify-between p-4 rounded-2xl cursor-pointer transition-all border ${activeDraftId === draft.id ? 'bg-white border-zinc-300 shadow-sm' : 'bg-transparent border-transparent hover:bg-white/60'}`}
                   >
                     <div>
-                      <div className="text-sm font-semibold text-zinc-900">${Number(draft.extractedData?.totalAmount || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                      <div className="text-sm font-semibold text-zinc-900">₹{Number(draft.extractedData?.totalAmount || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
                       <div className="text-xs font-medium text-zinc-500 mt-0.5">{draft.extractedData?.items?.length || 0} items</div>
                     </div>
                     <button 
@@ -188,7 +188,7 @@ export default function GenerateClient({ initialDrafts = [] }: { initialDrafts?:
               <div className="bg-white rounded-3xl border border-zinc-100 p-8 flex items-center justify-between shadow-sm">
                 <div>
                   <div className="text-xs font-semibold text-zinc-400 uppercase tracking-widest mb-2">Total Amount</div>
-                  <div className="text-4xl font-semibold tracking-tight text-zinc-900">${generatedData.totalAmount?.toLocaleString(undefined, {minimumFractionDigits: 2}) || 0}</div>
+                  <div className="text-4xl font-semibold tracking-tight text-zinc-900">₹{generatedData.totalAmount?.toLocaleString(undefined, {minimumFractionDigits: 2}) || 0}</div>
                 </div>
                 <div className="h-14 w-14 rounded-full bg-zinc-100 flex items-center justify-center border border-zinc-200/50">
                   <Check className="h-6 w-6 text-zinc-700" />
@@ -200,6 +200,7 @@ export default function GenerateClient({ initialDrafts = [] }: { initialDrafts?:
                   <thead className="bg-zinc-50/50 text-zinc-500 font-medium border-b border-zinc-100">
                     <tr>
                       <th className="px-6 py-4">Product Name</th>
+                      <th className="px-6 py-4">HSN</th>
                       <th className="px-6 py-4 text-center">Qty</th>
                       <th className="px-6 py-4 text-right">Rate</th>
                       <th className="px-6 py-4 text-right">Amount</th>
@@ -209,9 +210,10 @@ export default function GenerateClient({ initialDrafts = [] }: { initialDrafts?:
                     {generatedData.items?.map((item: any, idx: number) => (
                       <tr key={idx} className="hover:bg-zinc-50/30 transition-colors">
                         <td className="px-6 py-5 font-medium text-zinc-800">{item.product_name}</td>
+                        <td className="px-6 py-5 text-zinc-500 text-sm">{item.hsn || '-'}</td>
                         <td className="px-6 py-5 text-center text-zinc-500">{item.quantity}</td>
-                        <td className="px-6 py-5 text-right text-zinc-500">${Number(item.rate).toFixed(2)}</td>
-                        <td className="px-6 py-5 text-right font-medium text-zinc-900">${Number(item.amount).toFixed(2)}</td>
+                        <td className="px-6 py-5 text-right text-zinc-500">₹{Number(item.rate).toFixed(2)}</td>
+                        <td className="px-6 py-5 text-right font-medium text-zinc-900">₹{Number(item.amount).toFixed(2)}</td>
                       </tr>
                     ))}
                   </tbody>
