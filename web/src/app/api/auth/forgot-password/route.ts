@@ -28,7 +28,11 @@ export async function POST(req: Request) {
       },
     });
 
-    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`;
+    const origin = req.headers.get('origin') || 
+                   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 
+                   (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'));
+                   
+    const resetUrl = `${origin}/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`;
 
     await sendEmail(
       email,

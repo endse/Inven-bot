@@ -9,21 +9,23 @@ export type SessionPayload = {
   name?: string | null;
 } & JWTPayload;
 
-const secretKey = process.env.JWT_SECRET || 'super-secret-default-key-change-in-production';
-const encodedKey = new TextEncoder().encode(secretKey);
+function getEncodedKey() {
+  const secretKey = process.env.JWT_SECRET || 'super-secret-default-key-change-in-production';
+  return new TextEncoder().encode(secretKey);
+}
 
 export async function signToken(payload: any) {
   return new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('7d')
-    .sign(encodedKey);
+    .sign(getEncodedKey());
 }
 
 export async function verifyToken(token: string | undefined = ''): Promise<SessionPayload | null> {
   try {
     if (!token) return null;
-    const { payload } = await jwtVerify(token, encodedKey, {
+    const { payload } = await jwtVerify(token, getEncodedKey(), {
       algorithms: ['HS256'],
     });
     return payload as SessionPayload;
