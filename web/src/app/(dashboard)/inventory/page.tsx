@@ -3,6 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button"
 import { Download } from "lucide-react"
 import Pagination from "@/components/Pagination"
+import { InventoryService } from "@/services/InventoryService"
 
 import InventoryFilter from "./InventoryFilter"
 
@@ -13,62 +14,7 @@ export default async function InventoryPage(props: { searchParams: Promise<{ mon
   const page = parseInt(searchParams.page || "1", 10);
   const pageSize = 20;
 
-  const totalCount = await prisma.product.count();
-  const totalPages = Math.ceil(totalCount / pageSize);
-
-  const products = await prisma.product.findMany({
-    include: { transactions: true },
-    orderBy: { name: 'asc' },
-    skip: (page - 1) * pageSize,
-    take: pageSize
-  })
-
-  let targetMonthStart = new Date();
-  let displayMonth = "";
-
-  if (searchParams.month) {
-    const [y, m] = searchParams.month.split('-');
-    targetMonthStart = new Date(Number(y), Number(m) - 1, 1);
-    displayMonth = searchParams.month;
-  } else {
-    const latestTx = await prisma.transaction.findFirst({
-      orderBy: { transactionDate: 'desc' }
-    });
-    if (latestTx) {
-      targetMonthStart = new Date(latestTx.transactionDate.getFullYear(), latestTx.transactionDate.getMonth(), 1);
-      const m = (targetMonthStart.getMonth() + 1).toString().padStart(2, '0');
-      displayMonth = `${targetMonthStart.getFullYear()}-${m}`;
-    }
-  }
-  
-  const targetMonthEnd = new Date(targetMonthStart.getFullYear(), targetMonthStart.getMonth() + 1, 1);
-
-  const inventory = products.map((p, index) => {
-    let openingBalance = 0;
-    let purchases = 0;
-    let sales = 0;
-
-    p.transactions.forEach(tx => {
-      if (tx.transactionDate < targetMonthStart) {
-        if (tx.transactionType === "purchase") openingBalance += Number(tx.quantity);
-        if (tx.transactionType === "sale") openingBalance -= Number(tx.quantity);
-      } else if (tx.transactionDate >= targetMonthStart && tx.transactionDate < targetMonthEnd) {
-        if (tx.transactionType === "purchase") purchases += Number(tx.quantity);
-        if (tx.transactionType === "sale") sales += Number(tx.quantity);
-      }
-    });
-
-    const stock = openingBalance + purchases - sales;
-
-    return { 
-      ...p, 
-      sno: index + 1,
-      openingBalance, 
-      purchases, 
-      sales, 
-      stock 
-    }
-  })
+  const { inventory, displayMonth, totalPages } = await InventoryService.getCalculatedInventory(page, pageSize, searchParams.month);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">

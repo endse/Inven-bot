@@ -1,8 +1,9 @@
 "use client"
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Upload, CheckSquare, Package, FileBarChart, History, Bot, Sparkles, Users, LogOut } from "lucide-react";
+import { LayoutDashboard, Upload, CheckSquare, Package, FileBarChart, History, Bot, Sparkles, Users, LogOut, Moon, Sun, Activity } from "lucide-react";
 import { toast } from "sonner";
+import { useTheme } from "next-themes";
 
 const links = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -17,6 +18,7 @@ const links = [
 export function Sidebar({ role, userName, userEmail }: { role?: string, userName?: string, userEmail?: string }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { theme, setTheme } = useTheme();
 
   const handleLogout = async () => {
     try {
@@ -31,6 +33,7 @@ export function Sidebar({ role, userName, userEmail }: { role?: string, userName
   const navLinks = [...links];
   if (role === 'ADMIN') {
     navLinks.push({ href: "/admin/users", label: "Users", icon: Users });
+    navLinks.push({ href: "/admin/queues", label: "Queues", icon: Activity });
   }
 
   return (
@@ -77,6 +80,10 @@ export function Sidebar({ role, userName, userEmail }: { role?: string, userName
               <span className="font-medium text-sidebar-foreground truncate">{userName || 'User'}</span>
               <span className="text-xs text-sidebar-foreground/60 truncate">{userEmail || 'No email'}</span>
             </div>
+            <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} className="p-1 hover:text-amber-500 transition-colors shrink-0" title="Toggle Theme">
+              <Sun className="h-4 w-4 dark:hidden" />
+              <Moon className="h-4 w-4 hidden dark:block" />
+            </button>
             <button onClick={handleLogout} className="p-1 hover:text-red-500 transition-colors shrink-0" title="Logout">
               <LogOut className="h-4 w-4" />
             </button>

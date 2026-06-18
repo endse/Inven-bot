@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { generateInventoryPdf, generateBillPdf } from '@/lib/pdf';
 import { sendEmailWithPdf } from '@/lib/email';
+import { getMonthlyInventoryEmailHtml, getGeneratedBillEmailHtml } from '@/lib/email-templates';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,6 +30,7 @@ export async function GET() {
       let filename: string;
       let subject: string;
       let text: string;
+      let html: string;
 
       const payload = task.payload as any;
 
@@ -40,6 +42,7 @@ export async function GET() {
         filename = `Inventory_Report_${month}.pdf`;
         subject = `Monthly Inventory Report - ${month}`;
         text = `Please find attached the inventory report for ${month}.`;
+        html = getMonthlyInventoryEmailHtml(month);
         
       } else if (task.type === 'generated_bill') {
         const draftId = payload.draftId;
@@ -49,12 +52,13 @@ export async function GET() {
         filename = `Invoice_${draftId.slice(-6)}.pdf`;
         subject = `Generated Bill - ${draftId.slice(-6)}`;
         text = `Please find attached the generated bill document.`;
+        html = getGeneratedBillEmailHtml(draftId);
         
       } else {
         throw new Error(`Unknown email task type: ${task.type}`);
       }
 
-      await sendEmailWithPdf(task.recipient, subject, text, pdfBuffer, filename);
+      await sendEmailWithPdf(task.recipient, subject, text, pdfBuffer, filename, html);
 
       // Delete the email task from the queue once it has been successfully sent
       await prisma.emailQueue.delete({

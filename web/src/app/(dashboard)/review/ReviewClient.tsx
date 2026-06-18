@@ -150,8 +150,15 @@ export default function ReviewClient({ initialDrafts }: { initialDrafts: any[] }
               <Package className="h-5 w-5 text-indigo-500" /> Line Items ({activeDraft.extractedData.items.length})
             </h3>
             <div className="space-y-4">
-              {activeDraft.extractedData.items.map((item: any, idx: number) => (
-                <div key={idx} className="p-4 sm:p-5 border rounded-2xl shadow-sm bg-white transition-all hover:shadow-md group">
+              {activeDraft.extractedData.items.map((item: any, idx: number) => {
+                const isLowConfidence = item.confidence_score !== undefined && item.confidence_score < 0.85;
+                return (
+                <div key={idx} className={`p-4 sm:p-5 border rounded-2xl shadow-sm transition-all hover:shadow-md group ${isLowConfidence ? 'bg-amber-50 border-amber-200' : 'bg-white'}`}>
+                  {isLowConfidence && (
+                    <div className="mb-3 flex items-center gap-2 text-xs font-semibold text-amber-600 bg-amber-100/50 w-fit px-2 py-1 rounded-md">
+                      ⚠️ Low Confidence: {(item.confidence_score * 100).toFixed(0)}%
+                    </div>
+                  )}
                   <div className="flex flex-col sm:flex-row gap-4">
                     <div className="flex-1">
                       <label className="text-xs font-semibold text-slate-500 mb-1.5 block">Product Name</label>
@@ -198,10 +205,53 @@ export default function ReviewClient({ initialDrafts }: { initialDrafts: any[] }
                       </div>
                     </div>
                   </div>
+
+                  <div className="flex flex-col sm:flex-row gap-4 mt-4">
+                    <div className="flex-1">
+                      <label className="text-xs font-semibold text-slate-500 mb-1.5 block">HSN Code</label>
+                      <Input 
+                        className="rounded-xl bg-slate-50 border-transparent focus-visible:bg-white focus-visible:border-primary transition-all font-medium"
+                        value={item.hsn || ""} 
+                        onChange={e => {
+                          const newItems = [...activeDraft.extractedData.items];
+                          newItems[idx].hsn = e.target.value;
+                          setActiveDraft({...activeDraft, extractedData: {...activeDraft.extractedData, items: newItems}})
+                        }} 
+                      />
+                    </div>
+                    <div className="flex gap-4 sm:w-[200px]">
+                      <div className="flex-1">
+                        <label className="text-xs font-semibold text-slate-500 mb-1.5 block">Tax (%)</label>
+                        <Input 
+                          type="number" 
+                          className="rounded-xl bg-slate-50 border-transparent focus-visible:bg-white focus-visible:border-primary transition-all text-center font-medium"
+                          value={item.tax_rate || 0} 
+                          onChange={e => {
+                            const newItems = [...activeDraft.extractedData.items];
+                            newItems[idx].tax_rate = Number(e.target.value);
+                            setActiveDraft({...activeDraft, extractedData: {...activeDraft.extractedData, items: newItems}})
+                          }} 
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <label className="text-xs font-semibold text-slate-500 mb-1.5 block">Disc (%)</label>
+                        <Input 
+                          type="number" 
+                          className="rounded-xl bg-slate-50 border-transparent focus-visible:bg-white focus-visible:border-primary transition-all font-medium text-right"
+                          value={item.discount || 0} 
+                          onChange={e => {
+                            const newItems = [...activeDraft.extractedData.items];
+                            newItems[idx].discount = Number(e.target.value);
+                            setActiveDraft({...activeDraft, extractedData: {...activeDraft.extractedData, items: newItems}})
+                          }} 
+                        />
+                      </div>
+                    </div>
+                  </div>
                   
                   <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
                     <div className="text-sm font-medium text-slate-600">
-                      Total: ₹{(Number(item.quantity || 0) * Number(item.rate || 0)).toFixed(2)}
+                      Subtotal: ₹{(Number(item.quantity || 0) * Number(item.rate || 0)).toFixed(2)}
                     </div>
                     <div className="flex items-center gap-3 w-full sm:w-auto">
                       <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider hidden sm:inline">Action</span>
@@ -226,7 +276,7 @@ export default function ReviewClient({ initialDrafts }: { initialDrafts: any[] }
                     </div>
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
           </div>
         </div>

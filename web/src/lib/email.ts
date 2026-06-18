@@ -17,7 +17,7 @@ export const transporter = nodemailer.createTransport({
   },
 });
 
-export async function sendEmailWithPdf(to: string, subject: string, text: string, pdfBuffer: Buffer, filename: string) {
+export async function sendEmailWithPdf(to: string, subject: string, text: string, pdfBuffer: Buffer, filename: string, html?: string) {
   if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
     console.warn("SMTP credentials missing. Simulating email send for:", to, subject);
     return { simulated: true };
@@ -28,6 +28,7 @@ export async function sendEmailWithPdf(to: string, subject: string, text: string
     to,
     subject,
     text,
+    html,
     attachments: [
       {
         filename,

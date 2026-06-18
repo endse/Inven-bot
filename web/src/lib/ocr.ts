@@ -21,7 +21,11 @@ Return JSON:
       "product_name":"",
       "quantity":0,
       "rate":0,
-      "amount":0
+      "amount":0,
+      "hsn":"",
+      "discount":0,
+      "tax_rate":0,
+      "confidence_score":0.99
     }
   ]
 }
@@ -35,6 +39,10 @@ export interface ExtractedItem {
   quantity: number;
   rate: number;
   amount: number;
+  hsn?: string;
+  discount?: number;
+  tax_rate?: number;
+  confidence_score?: number;
 }
 
 export interface ExtractedInvoice {
