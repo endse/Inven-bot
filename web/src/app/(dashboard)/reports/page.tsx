@@ -16,14 +16,11 @@ export default function ReportsPage() {
   }
 
   const handleEmail = async () => {
-    if (!email) {
-      toast.error("Please enter an email address");
-      return;
-    }
     try {
       setIsQueueing(true);
-      await queueMonthlyInventoryEmail(month, email);
+      await queueMonthlyInventoryEmail(month, email || undefined);
       toast.success("Inventory Report queued for emailing!");
+      setEmail("");
     } catch (e: any) {
       toast.error(e.message || "Failed to queue email");
     } finally {
@@ -47,7 +44,7 @@ export default function ReportsPage() {
             <h3 className="font-semibold text-sm">Email PDF Report</h3>
             <Input 
               type="email" 
-              placeholder="recipient@example.com" 
+              placeholder="Optional: Additional recipient email" 
               value={email} 
               onChange={e => setEmail(e.target.value)} 
             />

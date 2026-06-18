@@ -9,7 +9,8 @@ export async function GET() {
   try {
     const task = await prisma.emailQueue.findFirst({
       where: { 
-        status: { in: ['pending', 'failed'] }
+        status: { in: ['pending', 'failed'] },
+        attempts: { lt: 3 }
       },
       orderBy: { createdAt: 'asc' }
     });
@@ -55,9 +56,9 @@ export async function GET() {
 
       await sendEmailWithPdf(task.recipient, subject, text, pdfBuffer, filename);
 
-      await prisma.emailQueue.update({
-        where: { id: task.id },
-        data: { status: 'completed' }
+      // Delete the email task from the queue once it has been successfully sent
+      await prisma.emailQueue.delete({
+        where: { id: task.id }
       });
 
       return NextResponse.json({ processed: 1, type: task.type });

@@ -91,3 +91,29 @@ model EmailQueue {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 }
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum UserStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id               String     @id @default(uuid())
+  email            String     @unique
+  passwordHash     String
+  name             String?
+  role             Role       @default(USER)
+  status           UserStatus @default(PENDING)
+  
+  resetToken       String?
+  resetTokenExpiry DateTime?
+
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+}

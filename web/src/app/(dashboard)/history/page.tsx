@@ -4,11 +4,23 @@ import HistoryClient from "./HistoryClient"
 export const dynamic = 'force-dynamic'
 
 export default async function HistoryPage() {
-  const approvedDrafts = await prisma.invoiceDraft.findMany({
+  const draftsData = await prisma.invoiceDraft.findMany({
     where: { status: "approved" },
     select: { id: true, transactionType: true, status: true, extractedData: true, createdAt: true, updatedAt: true, transactions: true },
     orderBy: { createdAt: "desc" }
   })
+
+  // Serialize Decimal to numbers to pass to Client Component
+  const approvedDrafts = draftsData.map(draft => ({
+    ...draft,
+    extractedData: draft.extractedData as any,
+    transactions: draft.transactions.map(t => ({
+      ...t,
+      quantity: t.quantity.toNumber(),
+      rate: t.rate?.toNumber() ?? null,
+      amount: t.amount?.toNumber() ?? null
+    }))
+  }))
 
   return (
     <div className="space-y-6">

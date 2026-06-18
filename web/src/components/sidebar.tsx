@@ -1,7 +1,8 @@
 "use client"
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { LayoutDashboard, Upload, CheckSquare, Package, FileBarChart, History, Bot, Sparkles } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { LayoutDashboard, Upload, CheckSquare, Package, FileBarChart, History, Bot, Sparkles, Users, LogOut } from "lucide-react";
+import { toast } from "sonner";
 
 const links = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -13,8 +14,24 @@ const links = [
   { href: "/reports", label: "Reports", icon: FileBarChart },
 ];
 
-export function Sidebar() {
+export function Sidebar({ role, userName, userEmail }: { role?: string, userName?: string, userEmail?: string }) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      router.push('/login');
+      router.refresh();
+    } catch (error) {
+      toast.error('Failed to logout');
+    }
+  };
+
+  const navLinks = [...links];
+  if (role === 'ADMIN') {
+    navLinks.push({ href: "/admin/users", label: "Users", icon: Users });
+  }
 
   return (
     <>
@@ -30,7 +47,7 @@ export function Sidebar() {
         </div>
         <div className="flex-1 overflow-y-auto py-6 px-4">
           <nav className="space-y-1.5">
-            {links.map((link) => {
+            {navLinks.map((link) => {
               const isActive = pathname === link.href || (link.href !== '/' && pathname?.startsWith(link.href));
               const Icon = link.icon;
               return (
@@ -54,19 +71,22 @@ export function Sidebar() {
         <div className="p-4 border-t border-sidebar-border/50 shrink-0">
           <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-sidebar-accent/50 text-sm border border-sidebar-border/50">
             <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-primary to-accent flex items-center justify-center text-white font-bold text-xs shadow-sm shrink-0">
-              US
+              {userName?.charAt(0)?.toUpperCase() || userEmail?.charAt(0)?.toUpperCase() || 'U'}
             </div>
-            <div className="flex flex-col truncate">
-              <span className="font-medium text-sidebar-foreground truncate">Accountant</span>
-              <span className="text-xs text-sidebar-foreground/60 truncate">Pro Workspace</span>
+            <div className="flex flex-col truncate flex-1">
+              <span className="font-medium text-sidebar-foreground truncate">{userName || 'User'}</span>
+              <span className="text-xs text-sidebar-foreground/60 truncate">{userEmail || 'No email'}</span>
             </div>
+            <button onClick={handleLogout} className="p-1 hover:text-red-500 transition-colors shrink-0" title="Logout">
+              <LogOut className="h-4 w-4" />
+            </button>
           </div>
         </div>
       </div>
 
       {/* Mobile Bottom Navigation */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-md border-t border-slate-200 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] z-50 px-2 flex items-center justify-around pb-safe">
-        {links.map((link) => {
+        {navLinks.map((link) => {
           const isActive = pathname === link.href || (link.href !== '/' && pathname?.startsWith(link.href));
           const Icon = link.icon;
           return (

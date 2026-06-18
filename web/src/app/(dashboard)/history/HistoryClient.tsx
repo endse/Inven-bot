@@ -197,11 +197,11 @@ export default function HistoryClient({ initialDrafts }: { initialDrafts: any[] 
                 </button>
                 <button 
                   onClick={async () => {
-                    const email = window.prompt("Enter email address to send this bill to:");
-                    if (!email) return;
+                    const email = window.prompt("Enter email for an unregistered user (leave blank to just email all registered users):");
+                    if (email === null) return;
                     try {
                       const { queueGeneratedBillEmail } = await import('../email-actions');
-                      await queueGeneratedBillEmail(draft.id, email);
+                      await queueGeneratedBillEmail(draft.id, email || undefined);
                       toast.success("Bill queued for emailing!");
                     } catch (e: any) {
                       toast.error("Failed to queue email: " + e.message);

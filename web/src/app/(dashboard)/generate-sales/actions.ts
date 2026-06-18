@@ -87,10 +87,9 @@ export async function processQueueAction() {
       }
     });
 
-    // Mark task completed
-    await prisma.generateQueue.update({
-      where: { id: task.id },
-      data: { status: "completed", errorMessage: null }
+    // Delete task from queue once it is generated and added to review
+    await prisma.generateQueue.delete({
+      where: { id: task.id }
     });
 
     revalidatePath("/generate-sales");
